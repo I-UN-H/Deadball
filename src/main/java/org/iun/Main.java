@@ -1,6 +1,7 @@
 package org.iun;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
@@ -24,7 +25,7 @@ public class Main {
     static Scanner sr = new Scanner(System.in);
 
     static Boolean loaded = false;
-    public static ArrayList<Bases> diamond = new ArrayList<Bases>();
+    public static ArrayList<Bases> diamond = new ArrayList<>();
 
     public static void main(String[] args){
 
@@ -53,7 +54,7 @@ public class Main {
         Player p7 = new Player();
         Player p8 = new Player();
 
-        ArrayList<Player> lineup1 = new ArrayList<Player>();
+        ArrayList<Player> lineup1 = new ArrayList<>();
         lineup1.add(p0);
         lineup1.add(p1);
         lineup1.add(p2);
@@ -64,7 +65,7 @@ public class Main {
         lineup1.add(p7);
         lineup1.add(p8);
 
-        ArrayList<Player> fielding1 = new ArrayList<Player>();
+        ArrayList<Player> fielding1 = new ArrayList<>();
         fielding1.add(p0);
         fielding1.add(p1);
         fielding1.add(p2);
@@ -85,7 +86,7 @@ public class Main {
         Player p17 = new Player();
         Player p18 = new Player();
 
-        ArrayList<Player> lineup2 = new ArrayList<Player>();
+        ArrayList<Player> lineup2 = new ArrayList<>();
         lineup2.add(p10);
         lineup2.add(p11);
         lineup2.add(p12);
@@ -96,7 +97,7 @@ public class Main {
         lineup2.add(p17);
         lineup2.add(p18);
 
-        ArrayList<Player> fielding2 = new ArrayList<Player>();
+        ArrayList<Player> fielding2 = new ArrayList<>();
         fielding2.add(p10); //P
         fielding2.add(p11); //C
         fielding2.add(p12); //1B
@@ -171,12 +172,12 @@ public class Main {
     public static void out(Bases base) {
         int baseNumb=0;
         for(int x=0;x<2;x++) {
-            if(diamond.get(x).getBaseName()==base.getBaseName())
+            if(diamond.get(x).getBaseName().equals(base.getBaseName()))
                 baseNumb=x;
         }
         if(!loaded)
             System.out.println(base.getRunnerName()+" is out at "+diamond.get(baseNumb+1).getBaseName());
-        else if(base.getBaseName()=="1st")
+        else if(base.getBaseName().equals("1st"))
             System.out.println(base.getRunnerName()+" is out attempting to return to 1st.");
         base.updateRunner(p);
         outs++;
@@ -184,11 +185,11 @@ public class Main {
 
     public static void defTrait(Player fielder, Player batter,boolean single,boolean PE) {
         int roll=(int)(Math.random()*12+1);
-        if(fielder.getTrait1()=="D+" ||fielder.getTrait2()=="D+") {//need to work on selecting defense
+        if(fielder.getTrait1().equals("D+") ||fielder.getTrait2().equals("D+")) {//need to work on selecting defense
             System.out.println(fielder.getName()+" has trait D+, +1 to roll");
             roll++;
         }
-        else if(fielder.getTrait1()=="D-" || fielder.getTrait2()=="D-") {
+        else if(fielder.getTrait1().equals("D-") || fielder.getTrait2().equals("D-")) {
             System.out.println(fielder.getName()+" has trait D-, -1 to roll");
             roll--;
         }
@@ -251,11 +252,11 @@ public class Main {
             System.out.println("Error! Batter safe. Runners advance 2.");
             singleAdv(batter);
         }
-        else if(roll>=3 && roll<=11) {
+        else if(roll<=11) {
             System.out.println("No change!");
             single(batter);
         }
-        else if(roll>=12) {
+        else {
             System.out.println("Batter out, Runners hold.");
             outs++;
         }
@@ -303,7 +304,7 @@ public class Main {
             System.out.println("Error! Batter safe. Runners advance 1.");
             doubleAdv(batter);
         }
-        else if(roll>=3 && roll<=9) {
+        else if(roll<=9) {
             System.out.println("No change!");
             doubleHit(batter);
         }
@@ -380,22 +381,22 @@ public class Main {
             else if(roll>=2&&roll<=lineup.get(battingNumb).getBT()||roll<1){
                 boolean crit=false;
                 int roll2=(int)(Math.random()*20+1);//hit table roll
-                if(batter.getTrait1()=="P++"||batter.getTrait2()=="P++")
+                if(batter.getTrait1().equals("P++")||batter.getTrait2().equals("P++"))
                     roll+=2;
-                else if(batter.getTrait1()=="P+"||batter.getTrait2()=="P+")
+                else if(batter.getTrait1().equals("P+")||batter.getTrait2().equals("P+"))
                     roll++;
-                else if(batter.getTrait1()=="P-"||batter.getTrait2()=="P-")
+                else if(batter.getTrait1().equals("P-")||batter.getTrait2().equals("P-"))
                     roll--;
-                else if(batter.getTrait1()=="P--" ||batter.getTrait2()=="P--")
+                else if(batter.getTrait1().equals("P--")||batter.getTrait2().equals("P--"))
                     roll-=2;
-                if((roll>=2 && roll<+5)||roll<1){
+                if((roll>=2 && roll<=5)||roll<1){
                     System.out.println("Critical Hit");
                     crit=true;
                 }
                 else
                     System.out.println("Hit!");
                 System.out.println("["+roll2+"]");
-                if(crit==true) {//TODO get crits working and make sure regular hits still work
+                if(crit) {//TODO get crits working and make sure regular hits still work
                     if(roll2>=1&&roll2<=14) {
                         System.out.println("Single into double!");
                         if(B3.onBase())
@@ -417,7 +418,7 @@ public class Main {
                         B3.updateRunner(batter);
                     }
                 }
-                if(crit==false){
+                if(!crit){
                     if(roll2<=2||(roll2>=7&&roll2<=9)) {//regular clear single
                         System.out.println("Single");
                         single(batter);
@@ -438,7 +439,7 @@ public class Main {
                         System.out.println("Possible single to Short Stop!");
                         defTrait(fielding.get(roll2-1),batter,true,false);
                     }
-                    else if(roll2>=10&&roll2<=14) //single, runners adv. 2
+                    else if(roll2<=14) //single, runners adv. 2
                         singleAdv(batter);
                     else if(roll2==15) { //double
                         System.out.println("Possible double to Left Field!");
@@ -491,7 +492,7 @@ public class Main {
             else {
                 int fielder=roll%10;
                 boolean struck=false;
-                if(fielder<=2&&(fielding.get(0).getTrait1()!="GB+"||fielding.get(0).getTrait2()!="GB+")) {
+                if(fielder<=2&&(!Objects.equals(fielding.get(0).getTrait1(), "GB+") || !Objects.equals(fielding.get(0).getTrait2(), "GB+"))) {
                     System.out.println("Strikeout!");
                     struck=true;
                     outs++;
@@ -510,7 +511,7 @@ public class Main {
                     System.out.println("Heading to CF! "+fielding.get(fielder-1).getName()+" is fielding!");
                 else if(fielder==9)
                     System.out.println("Heading to RF! "+fielding.get(fielder-1).getName()+" is fielding!");
-                if(struck==false) {
+                if(!struck) {
                     if(roll>=(lineup.get(battingNumb).getOBT())+6 && roll<=49){
                         System.out.println(fielding.get(fielder-1).getName()+" catches the ball! "+batter.getName()+" is out!");
                         outs++;
@@ -557,11 +558,11 @@ public class Main {
                     {
                         int outcount=0;
                         if(fielder<=6) {
-                            if(B2.onBase()&&fielder<=6) {
+                            if(B2.onBase()) {
                                 out(B2);
                                 outcount++;
                             }
-                            else if(B1.onBase()&&fielder<=6) {
+                            else if(B1.onBase()) {
                                 out(B1);
                                 outcount++;
                             }
@@ -574,8 +575,6 @@ public class Main {
                             else
                                 System.out.println();
                         }
-                        else if(outcount==2)
-                            System.out.println("Triple Play!!!!!!");
                         outs++;
                     }
                 }
