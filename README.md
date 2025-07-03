@@ -18,3 +18,6 @@ What's missing?
 6. Very very late in dev, automated managers, in take the info of a game including inning, scores, current batter, runners, batter/pitcher handedness, that jazz
 
 That should be all for rn, enjoy :) 
+
+Playtesters:
+Xela4Eva
