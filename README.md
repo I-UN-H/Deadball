@@ -10,12 +10,13 @@ Known Issues/Things to change
 3. Change some text to be either more descriptive/simplified
 
 What's missing?
-1. Oddities
-2. Pitchers (primary focus)!
-3. A easier way to create new traits (possibly just its own object class, have a method that can be used when it applies in the game)
-4. Save states, possibly in .txt files idk yet gotta figure that out
-5. Manager choices!
-6. Very very late in dev, automated managers, in take the info of a game including inning, scores, current batter, runners, batter/pitcher handedness, that jazz
+1. Games dont technically end!
+2. Oddities
+3. Pitchers (primary focus)!
+4. A easier way to create new traits (possibly just its own object class, have a method that can be used when it applies in the game)
+5. Save states, possibly in .txt files idk yet gotta figure that out
+6. Manager choices!
+7. Very very late in dev, automated managers, in take the info of a game including inning, scores, current batter, runners, batter/pitcher handedness, that jazz
 
 That should be all for rn, enjoy :) 
 
