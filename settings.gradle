@@ -12,3 +12,5 @@ plugins {
 
 rootProject.name = 'deadball'
 include('src')
+
+include 'src:main:resources'

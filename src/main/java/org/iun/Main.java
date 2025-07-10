@@ -1,13 +1,13 @@
 package org.iun;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
 
     static int score1=0;
     static int score2=0;
+    static boolean tie=false;
 
     static int teamscore=0;
 
@@ -113,15 +113,9 @@ public class Main {
 
         while(input!=-1)
         {
-            System.out.println("0. "+ p0.name);
-            System.out.println("1. "+ p1.name);
-            System.out.println("2. "+ p2.name);
-            System.out.println("3. "+ p3.name);
-            System.out.println("4. "+ p4.name);
-            System.out.println("5. "+ p5.name);
-            System.out.println("6. "+ p6.name);
-            System.out.println("7. "+ p7.name);
-            System.out.println("8. "+ p8.name);
+            System.out.println("Away Team:");
+            for(int i=0;i<lineup1.size();i++)
+                System.out.println(i+". " + lineup1.get(i).getName());
             System.out.println("Type the number of a player to check their stats, or type -1 to start the match.");
             input=sr.nextInt();
             if(input!=-1)
@@ -131,10 +125,10 @@ public class Main {
 
         while(inning<=9.5)
         {
+            if(inning!=1)
+                System.out.println("Changing sides");
             outs=0;
-            B1.updateRunner(p);
-            B2.updateRunner(p);
-            B3.updateRunner(p);
+            empty();
             if(inning%1==.5) {
                 teamscore=score2;
                 battingNumb=batterHome;
@@ -150,7 +144,6 @@ public class Main {
                 System.out.println("Top of the "+(int)inning);
             }
             playing(battingTeam,fieldingTeam);
-            System.out.println("Changing sides");
             if(inning%1==.5) {
                 score2=teamscore;
                 batterHome=battingNumb;
@@ -161,6 +154,39 @@ public class Main {
             }
             inning+=.5;
         }
+        while(tie){
+            outs=0;
+            empty();
+            teamscore=score1;
+            fieldingTeam=fielding2;
+            battingTeam=lineup1;
+            battingNumb=batterAway;
+            System.out.println("Top of the "+(int)inning);
+            playing(battingTeam,fieldingTeam);
+            inning+=.5;
+            empty();
+            teamscore=score2;
+            battingNumb=batterHome;
+            fieldingTeam=fielding1;
+            battingTeam=lineup2;
+            System.out.println("Bottom of the "+(int)inning);
+            playing(battingTeam,fieldingTeam);
+            inning+=.5;
+        }
+        if(inning>=10){
+            if(score1>score2)
+                System.out.println("The Away Team wins with "+(score1-score2)+" over the opponent");
+            else if(score2>score1)
+                System.out.println("The Home Team wins with "+(score2-score1)+" over the opponent");
+            else
+                System.out.println("This isn't supposed to happen, report this bug immediately.");
+        }
+
+    }
+    public static void empty(){
+        B1.updateRunner(p);
+        B2.updateRunner(p);
+        B3.updateRunner(p);
     }
 
     public static void score(Bases base) {
@@ -185,72 +211,57 @@ public class Main {
 
     public static void defTrait(Player fielder, Player batter,boolean single,boolean PE) {
         int roll=(int)(Math.random()*12+1);
-        if(fielder.getTrait1().equals("D+") ||fielder.getTrait2().equals("D+")) {//need to work on selecting defense
+        if(fielder.findTrait("D+")) {//need to work on selecting defense
             System.out.println(fielder.getName()+" has trait D+, +1 to roll");
             roll++;
         }
-        else if(fielder.getTrait1().equals("D-") || fielder.getTrait2().equals("D-")) {
+        else if(fielder.findTrait("D-")) {
             System.out.println(fielder.getName()+" has trait D-, -1 to roll");
             roll--;
         }
         System.out.println("["+roll+"]");
         if(PE) {
             System.out.println("Possible error heading to "+fielder.getName());
-            if(roll<3)
+            if(roll<3) {
+                System.out.print("Makes an error!");
                 single(batter);
+            }
             else {
-                System.out.println(batter+" out!");
+                System.out.println(batter.getName()+" is out!");
                 outs++;
             }
         }
         else if(single)
-            singleDef(roll,batter);
+            singleDef(roll,batter,fielder);
         else
-            doubleDef(roll,batter);
+            doubleDef(roll,batter,fielder);
     }
 
-    public static void single(Player batter)
-    {
-        if(B1.onBase() && B2.onBase() && B3.onBase()){//bases loaded
-            score(B3);
-            B3.updateRunner(B2.getRunner());
-            B2.updateRunner(B1.getRunner());
-        }
-        else if(B1.onBase() && B2.onBase() && !B3.onBase()){//1st and 2nd
-            B3.updateRunner(B2.getRunner());
-            B2.updateRunner(B1.getRunner());
-        }
-        else if(B1.onBase() && !B2.onBase() && B3.onBase()){//1st and 3rd
-            score(B3);
-            B2.updateRunner(B1.getRunner());
-        }
-        else if(!B1.onBase() && B2.onBase() && B3.onBase()){//2nd and 3rd
-            score(B3);
-            B2.updateRunner(p);
-        }
-        else if(B1.onBase() && !B2.onBase() && !B3.onBase())//1st
-            B2.updateRunner(B1.getRunner());
-        else if(!B1.onBase() && B2.onBase() && !B3.onBase())//2nd
-            B3.emptyPrev(B2,p);
-        else if(!B1.onBase() && !B2.onBase() && B3.onBase())//3rd
-            score(B3);
-        B1.updateRunner(batter);
+    public static void single(Player batter) {
+          if(B3.onBase(false))
+              score(B3);
+          if(B2.onBase(false))
+              B3.emptyPrev(B2,p);
+          if(B1.onBase(false))
+              B2.emptyPrev(B1,p);
+          B1.updateRunner(batter);
     }
 
     public static void singleAdv(Player batter){
-        if(B3.onBase())
+        System.out.println("Single! Runners adv. 2");
+        if(B3.onBase(false))
             score(B3);
-        if(B2.onBase())
+        if(B2.onBase(false))
             score(B2);
-        if(B1.onBase())
+        if(B1.onBase(false))
             B3.emptyPrev(B1, p);
         B1.updateRunner(batter);
     }
 
-    public static void singleDef(int roll,Player batter){
+    public static void singleDef(int roll,Player batter,Player fielder){
         if(roll<=2) {
-            System.out.println("Error! Batter safe. Runners advance 2.");
-            singleAdv(batter);
+            System.out.print(fielder.getName()+"makes an error! Single turns into a ");
+            doubleHit(batter);
         }
         else if(roll<=11) {
             System.out.println("No change!");
@@ -263,53 +274,38 @@ public class Main {
     }
 
     public static void doubleHit(Player batter) {
-        if(B1.onBase() && B2.onBase() && B3.onBase()) {//bases loaded
+        System.out.println("Double!");
+        if(B3.onBase(false))
             score(B3);
+        if(B2.onBase(false))
             score(B2);
+        if(B1.onBase(false))
             B3.emptyPrev(B1,p);
-        }
-        else if(B1.onBase() && B2.onBase() && !B3.onBase()) {//1st and 2nd
-            score(B2);
-            B3.emptyPrev(B1,p);
-        }
-        else if(B1.onBase() && !B2.onBase() && B3.onBase()) {//1st and 3rd
-            score(B3);
-            B3.emptyPrev(B1,p);
-        }
-        else if(!B1.onBase() && B2.onBase() && B3.onBase()){//2nd and 3rd
-            score(B3);
-            score(B2);
-        }
-        else if(B1.onBase() && !B2.onBase() && !B3.onBase())//1st
-            B3.emptyPrev(B1,p);
-        else if(!B1.onBase() && B2.onBase() && !B3.onBase())//2nd
-            score(B2);
-        else if(B1.onBase() && !B2.onBase() && B3.onBase())//3rd
-            score(B3);
         B2.updateRunner(batter);
     }
 
     public static void doubleAdv(Player batter) {
-        if(B3.onBase())
+        System.out.println("Double! Runners adv. 3");
+        if(B3.onBase(false))
             score(B3);
-        if(B2.onBase())
+        if(B2.onBase(false))
             score(B2);
-        if(B1.onBase())
+        if(B1.onBase(false))
             score(B1);
         B2.updateRunner(batter);
     }
 
-    public static void doubleDef(int roll,Player batter) {
+    public static void doubleDef(int roll,Player batter, Player fielder) {
         if(roll<=2) {
-            System.out.println("Error! Batter safe. Runners advance 1.");
-            doubleAdv(batter);
+            System.out.print(fielder.getName()+"makes an error! Double turns to ");
+            triple(batter);
         }
         else if(roll<=9) {
             System.out.println("No change!");
             doubleHit(batter);
         }
         else if(roll==10||roll==11) {
-            System.out.println("Double turns into single! Runners adv. 2");
+            System.out.print("Double turns into ");
             singleAdv(batter);
         }
         else {//hit goes down a level and/or hit turns to out
@@ -318,16 +314,36 @@ public class Main {
         }
     }
 
+    public static void triple(Player batter){
+        System.out.println("Triple!");
+        if(B3.onBase(false))
+            score(B3);
+        if(B2.onBase(false))
+            score(B2);
+        if(B1.onBase(false))
+            score(B1);
+        B3.updateRunner(batter);
+    }
+
     public static void homer(Player batter) {
         System.out.println(batter.getName()+" has hit the ball and its going, going, going and its gone!!!!!! \n");
-        if(B3.onBase())
+        if(B3.onBase(false))
             score(B3);
-        if(B2.onBase())
+        if(B2.onBase(false))
             score(B2);
-        if(B1.onBase())
+        if(B1.onBase(false))
             score(B1);
         teamscore++;
         System.out.println(batter.getName()+" makes it home!");
+    }
+
+    public static void wait(int ms) {
+        try {
+            Thread.sleep(ms);
+        }
+        catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void playing(ArrayList<Player>lineup,ArrayList<Player>fielding) {
@@ -336,6 +352,7 @@ public class Main {
             Player batter=lineup.get(battingNumb);
             int roll=(int)(Math.random()*100+1);
             System.out.println(roll);
+            wait(3000);
             if(roll==1 || roll==99) {
                 System.out.println("Oddity!");
                 roll=(int)(Math.random()*10+1)+(int)(Math.random()*10+1);
@@ -381,13 +398,13 @@ public class Main {
             else if(roll>=2&&roll<=lineup.get(battingNumb).getBT()||roll<1){
                 boolean crit=false;
                 int roll2=(int)(Math.random()*20+1);//hit table roll
-                if(batter.getTrait1().equals("P++")||batter.getTrait2().equals("P++"))
+                if(batter.findTrait("P++"))
                     roll+=2;
-                else if(batter.getTrait1().equals("P+")||batter.getTrait2().equals("P+"))
+                else if(batter.findTrait("P+"))
                     roll++;
-                else if(batter.getTrait1().equals("P-")||batter.getTrait2().equals("P-"))
+                else if(batter.findTrait("P-"))
                     roll--;
-                else if(batter.getTrait1().equals("P--")||batter.getTrait2().equals("P--"))
+                else if(batter.findTrait("P--"))
                     roll-=2;
                 if((roll>=2 && roll<=5)||roll<1){
                     System.out.println("Critical Hit");
@@ -398,31 +415,17 @@ public class Main {
                 System.out.println("["+roll2+"]");
                 if(crit) {//TODO get crits working and make sure regular hits still work
                     if(roll2>=1&&roll2<=14) {
-                        System.out.println("Single into double!");
-                        if(B3.onBase())
-                            score(B3);
-                        if(B2.onBase())
-                            score(B2);
-                        if(B1.onBase())
-                            B3.emptyPrev(B1,p);
-                        B2.updateRunner(batter);
+                        System.out.print("Single into ");
+                        doubleHit(batter);
                     }
                     else if(roll2>=15&&roll2<18) {
-                        System.out.println("Double into Triple!");
-                        if(B3.onBase())
-                            score(B3);
-                        if(B2.onBase())
-                            score(B2);
-                        if(B1.onBase())
-                            score(B1);
-                        B3.updateRunner(batter);
+                        System.out.print("Double into ");
+                        triple(batter);
                     }
                 }
                 if(!crit){
-                    if(roll2<=2||(roll2>=7&&roll2<=9)) {//regular clear single
-                        System.out.println("Single");
+                    if(roll2<=2||(roll2>=7&&roll2<=9))//regular clear single
                         single(batter);
-                    }
                     else if(roll2==3) {//apply 1st base defense
                         System.out.println("Possible single to 1st base!");
                         defTrait(fielding.get(roll2-1),batter,true,false);
@@ -445,39 +448,38 @@ public class Main {
                         System.out.println("Possible double to Left Field!");
                         defTrait(fielding.get(roll2-9),batter,false,false);
                     }
-                    else if(roll2==16)
-                    {
+                    else if(roll2==16){
                         System.out.println("Possible double to Center Field!");
                         defTrait(fielding.get(roll2-9),batter,false,false);
                     }
-                    else if(roll2==17)
-                    {
+                    else if(roll2==17) {
                         System.out.println("Possible double to Right Field!");
                         defTrait(fielding.get(roll2-9),batter,false,false);
                     }
                     else if(roll2==18)
-                    {
-                        System.out.println("Hits a double, runners adv. 3");
                         doubleAdv(batter);
-                    }
                 }
                 if(roll2>=19)
                     homer(batter);
             }
-            else if(roll>=(lineup.get(battingNumb).getBT())+1 && roll<=(lineup.get(battingNumb).getOBT()))
-            {
+            else if(roll>=(lineup.get(battingNumb).getBT())+1 && roll<=(lineup.get(battingNumb).getOBT())){
                 System.out.println("Walk!");
-                if(B1.onBase())
-                    B2.emptyPrev(B1,p);
-                else if(B1.onBase() && B2.onBase()&&!B3.onBase()) {
-                    B3.emptyPrev(B2,p);
-                    B2.emptyPrev(B1,p);
-                }
-                else if(B1.onBase()&&B2.onBase()&&B3.onBase()){
+                wait(1000);
+                if(B1.onBase(false)&&B2.onBase(false)&&B3.onBase(false)) {
                     score(B3);
+                    wait(1000);
+                    B3.emptyPrev(B2, p);
+                    wait(1000);
+                    B2.emptyPrev(B1, p);
+                }
+                else if(B1.onBase(false) && B2.onBase(false)&&!B3.onBase(false)) {
                     B3.emptyPrev(B2,p);
+                    wait(1000);
                     B2.emptyPrev(B1,p);
                 }
+                else if(B1.onBase(false))
+                    B2.emptyPrev(B1,p);
+                wait(1000);
                 B1.updateRunner(lineup.get(battingNumb));
             }
             else if(roll>=(lineup.get(battingNumb).getOBT())+1 && roll<=(lineup.get(battingNumb).getOBT()+5)) {//TODO implement PE in a way that yknow... works :)
@@ -492,9 +494,11 @@ public class Main {
             else {
                 int fielder=roll%10;
                 boolean struck=false;
-                if(fielder<=2&&(!Objects.equals(fielding.get(0).getTrait1(), "GB+") || !Objects.equals(fielding.get(0).getTrait2(), "GB+"))) {
+                if(fielder==2&&(fielding.get(0).findTrait("GB+")))
+                    fielder=6;
+                else if(fielder<=2&&(!fielding.get(0).findTrait("GB+"))) {
                     System.out.println("Strikeout!");
-                    struck=true;
+                    struck = true;
                     outs++;
                 }
                 else if(fielder==3)
@@ -511,29 +515,30 @@ public class Main {
                     System.out.println("Heading to CF! "+fielding.get(fielder-1).getName()+" is fielding!");
                 else if(fielder==9)
                     System.out.println("Heading to RF! "+fielding.get(fielder-1).getName()+" is fielding!");
+                wait(2000);
                 if(!struck) {
                     if(roll>=(lineup.get(battingNumb).getOBT())+6 && roll<=49){
                         System.out.println(fielding.get(fielder-1).getName()+" catches the ball! "+batter.getName()+" is out!");
                         outs++;
                         if(fielder<=4||fielder>=7){
-                            if(B3.onBase())
+                            if(B3.onBase(false))
                                 score(B3);
-                            if(B2.onBase())
+                            if(B2.onBase(false))
                                 B3.emptyPrev(B2,p);
                         }
-                        if(fielder<=6&&B1.onBase())
+                        if(fielder<=6&&B1.onBase(false))
                             B2.emptyPrev(B1, p);
                     }
                     else if(roll>=50 && roll<=69){
                         if(fielder<=4||fielder>=7) {
-                            if(B3.onBase())
+                            if(B3.onBase(false))
                                 score(B3);
-                            if(B2.onBase())
+                            if(B2.onBase(false))
                                 B3.emptyPrev(B2,p);
                         }
-                        if(fielder<=6&&B1.onBase()) {
+                        if(fielder<=6&&B1.onBase(false)) {
                             System.out.println("Fielder's choice!");
-                            if(B2.onBase())
+                            if(B2.onBase(false))
                                 System.out.println(fielding.get(fielder-1).getName()+" catches the ball! "+batter.getName()+" is out!");
                             else {
                                 out(B1);
@@ -547,7 +552,7 @@ public class Main {
                     }
                     else if(roll>=70 && roll<=98){
                         System.out.println(fielding.get(fielder-1).getName()+" catches the ball! "+batter.getName()+" is out!");
-                        if(fielder<=6&&B1.onBase()&&!loaded) {
+                        if(fielder<=6&&B1.onBase(false)&&!loaded) {
                             System.out.println(fielding.get(fielder-1).getName()+" throws the ball to  "+fielding.get(2).getName());
                             out(B1);
                             System.out.println("Double Play!");
@@ -558,19 +563,19 @@ public class Main {
                     {
                         int outcount=0;
                         if(fielder<=6) {
-                            if(B2.onBase()) {
+                            if(B2.onBase(false)) {
                                 out(B2);
                                 outcount++;
                             }
-                            else if(B1.onBase()) {
+                            else if(B1.onBase(false)) {
                                 out(B1);
                                 outcount++;
                             }
                         }
-                        System.out.println(fielding.get(2).getName()+" catches the ball! "+batter.getName()+" is out at 1st!");
+                        System.out.print(fielding.get(2).getName()+" catches the ball! "+batter.getName()+" is out at 1st!");
                         if(outcount==1) {
                             System.out.print("Double Play!");
-                            if(B2.onBase()||B3.onBase())
+                            if(B2.onBase(false)||B3.onBase(false))
                                 System.out.println(" Runners hold.");
                             else
                                 System.out.println();
@@ -582,26 +587,28 @@ public class Main {
             if(battingNumb==8)
                 battingNumb=-1;
             battingNumb++;
-
             System.out.println();
-            if(B1.onBase() && B2.onBase() && B3.onBase()) //TODO Summary
+            if(B1.onBase(false) && B2.onBase(false) && B3.onBase(false)) //TODO Summary
                 System.out.println("Bases loaded!");
-            if(B1.onBase())
-                System.out.println(B1.getRunnerName()+" on 1st");
-            if(B2.onBase())
-                System.out.println(B2.getRunnerName()+" on 2nd");
-            if(B3.onBase())
-                System.out.println(B3.getRunnerName()+" on 3rd");
+            else {
+                B1.onBase(true);
+                B2.onBase(true);
+                B3.onBase(true);
+            }
+//            if(B1.onBase())
+//                System.out.println(B1.getRunnerName()+" on 1st");
+//            if(B2.onBase())
+//                System.out.println(B2.getRunnerName()+" on 2nd");
+//            if(B3.onBase())
+//                System.out.println(B3.getRunnerName()+" on 3rd");
             System.out.println("Out Count: "+ outs);
             if(inning%1==0)
                 score1=teamscore;
             else
                 score2=teamscore;
             System.out.println("Score: "+score1+"-"+score2);
+            tie= inning % 1 == .5 && score1 == score2;
             sr.nextLine();
-            @SuppressWarnings("unused")
-            String gaming=sr.nextLine();
         }
     }
 }
-

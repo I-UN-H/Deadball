@@ -1,10 +1,11 @@
 package org.iun;
 
 import java.io.PrintStream;
+import java.util.Objects;
 
 public class Bases {
     private Player runner;
-    private String name;
+    private final String name;
 
     public Bases(String var1, Player var2) {
         this.name = var1;
@@ -12,7 +13,7 @@ public class Bases {
     }
 
     public void updateRunner(Player var1) {
-        if (var1.getName() != "") {
+        if (!Objects.equals(var1.getName(), "")) {
             PrintStream var10000 = System.out;
             String var10001 = var1.getName();
             var10000.println(var10001 + " makes it to " + this.name);
@@ -26,8 +27,10 @@ public class Bases {
         var1.updateRunner(var2);
     }
 
-    public boolean onBase() {
-        return this.runner.getName() != "";
+    public boolean onBase(boolean summary) {
+        if(summary&&!Objects.equals(runner.getName(), ""))
+            System.out.println(runner.getName()+" is on "+this.name);
+        return !Objects.equals(this.runner.getName(), "");
     }
 
     public Player getRunner() {
