@@ -353,7 +353,7 @@ public class Main {
             Player batter=lineup.get(battingNumb);
             int BT = batter.getBT();
             int OBT = batter.getOBT();
-            if(batter.findTrait("C-",1)){
+            if(batter.findTrait("C-",1)&&(B2.onBase()||B3.onBase())){
                 BT=-3;
                 OBT=-3;
             }
