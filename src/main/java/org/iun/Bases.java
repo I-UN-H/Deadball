@@ -7,24 +7,20 @@ public class Bases {
     private Player runner;
     private final String name;
 
-    public Bases(String var1, Player var2) {
-        this.name = var1;
-        this.runner = var2;
+    public Bases(String name, Player runner) {
+        this.name = name;
+        this.runner = runner;
     }
 
-    public void updateRunner(Player var1) {
-        if (!Objects.equals(var1.getName(), "")) {
-            PrintStream var10000 = System.out;
-            String var10001 = var1.getName();
-            var10000.println(var10001 + " makes it to " + this.name);
-        }
-
-        this.runner = var1;
+    public void updateRunner(Player runner) {
+        if (!Objects.equals(runner.getName(), ""))
+            System.out.println(runner.getName() + " makes it to " + this.name);
+        this.runner = runner;
     }
 
-    public void emptyPrev(Bases var1, Player var2) {
-        this.updateRunner(var1.getRunner());
-        var1.updateRunner(var2);
+    public void emptyPrev(Bases base, Player empty) {
+        this.updateRunner(base.getRunner());
+        base.updateRunner(empty);
     }
 
     public boolean onBase(boolean summary) {

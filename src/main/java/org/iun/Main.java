@@ -111,6 +111,7 @@ public class Main {
         ArrayList<Player> fieldingTeam = fielding2;
         ArrayList<Player> battingTeam=lineup1;
 
+        System.out.println("Press enter in order to continue between At-bats.");
         while(input!=-1)
         {
             System.out.println("Away Team:");
@@ -350,6 +351,12 @@ public class Main {
         while(outs<3) {
             System.out.println(lineup.get(battingNumb).getPlayerData());
             Player batter=lineup.get(battingNumb);
+            int BT = batter.getBT();
+            int OBT = batter.getOBT();
+            if(batter.findTrait("C-",1)){
+                BT=-3;
+                OBT=-3;
+            }
             int roll=(int)(Math.random()*100+1);
             System.out.println(roll);
             wait(3000);
@@ -395,17 +402,17 @@ public class Main {
                 if(roll==20)
                     System.out.println("20");
             }
-            else if(roll>=2&&roll<=lineup.get(battingNumb).getBT()||roll<1){
+            else if(roll>=2&&roll<=BT||roll<1){
                 boolean crit=false;
                 int roll2=(int)(Math.random()*20+1);//hit table roll
                 if(batter.findTrait("P++"))
-                    roll+=2;
+                    roll2+=2;
                 else if(batter.findTrait("P+"))
-                    roll++;
+                    roll2++;
                 else if(batter.findTrait("P-"))
-                    roll--;
+                    roll2--;
                 else if(batter.findTrait("P--"))
-                    roll-=2;
+                    roll2-=2;
                 if((roll>=2 && roll<=5)||roll<1){
                     System.out.println("Critical Hit");
                     crit=true;
@@ -424,7 +431,17 @@ public class Main {
                     }
                 }
                 if(!crit){
-                    if(roll2<=2||(roll2>=7&&roll2<=9))//regular clear single
+                    if(batter.findTrait("S+")||batter.findTrait("C+")&&roll2<=2){
+                        if(batter.findTrait("S+",roll)){
+                            if(roll2==1)
+                                doubleHit(batter);
+                            else if(roll2==2)
+                                triple(batter);
+                        }
+                        if(batter.findTrait("C+",1))
+                            doubleHit(batter);
+                    }
+                    else if(roll2<=2||(roll2>=7&&roll2<=9))//regular clear single
                         single(batter);
                     else if(roll2==3) {//apply 1st base defense
                         System.out.println("Possible single to 1st base!");
@@ -462,7 +479,7 @@ public class Main {
                 if(roll2>=19)
                     homer(batter);
             }
-            else if(roll>=(lineup.get(battingNumb).getBT())+1 && roll<=(lineup.get(battingNumb).getOBT())){
+            else if(roll<=OBT){
                 System.out.println("Walk!");
                 wait(1000);
                 if(B1.onBase(false)&&B2.onBase(false)&&B3.onBase(false)) {
@@ -482,7 +499,7 @@ public class Main {
                 wait(1000);
                 B1.updateRunner(lineup.get(battingNumb));
             }
-            else if(roll>=(lineup.get(battingNumb).getOBT())+1 && roll<=(lineup.get(battingNumb).getOBT()+5)) {//TODO implement PE in a way that yknow... works :)
+            else if(roll<=OBT+5) {//TODO implement PE in a way that yknow... works :)
                 System.out.println("Possible Error");
                 int fielder=roll%10;
                 if(fielder==0||fielder==1)

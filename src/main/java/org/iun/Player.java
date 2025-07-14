@@ -63,22 +63,16 @@ public class Player {
         this.name = var1;}
     public boolean findTrait(String trait) {
         if(this.consTraitList().contains(trait)){
-            if(trait.equals("P++"))
-                System.out.println("+2 to HT Roll");
-            else if(trait.equals("P--"))
-                System.out.println("-2 to HT Roll");
-            else if(trait.equals("P+"))
-                System.out.println("+1 to HT Roll");
-            else if(trait.equals("P-"))
-                System.out.println("-1to HT Roll");
-            else if(trait.equals("D+"))
-                System.out.println("+1 to DEF Roll (-1 to Stolen base roll if Catcher)");
-            else if(trait.equals("D-"))
-                System.out.println("-1 to DEF Roll (+1 to Stolen base roll if Catcher)");
-            else if(trait.equals("T+"))
-                System.out.println("Can reroll on injury table!");
-            else if(trait.equals("S-"))
-                System.out.println("-2 to Stolen base rolls");
+            switch (trait) {
+                case "P++" -> System.out.println("+2 to HT Roll");
+                case "P--" -> System.out.println("-2 to HT Roll");
+                case "P+" -> System.out.println("+1 to HT Roll");
+                case "P-" -> System.out.println("-1to HT Roll");
+                case "D+" -> System.out.println("+1 to DEF Roll (-1 to Stolen base roll if Catcher)");
+                case "D-" -> System.out.println("-1 to DEF Roll (+1 to Stolen base roll if Catcher)");
+                case "T+" -> System.out.println("Can reroll on injury table!");
+                case "S-" -> System.out.println("-2 to Stolen base rolls");
+            }
         }
         return this.consTraitList().contains(trait);}
     public boolean findTrait(String trait, int use) {
